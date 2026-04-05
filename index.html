@@ -10,10 +10,10 @@
             --bg-color: #f4f7f6;
         }
         body {
-            font-family: 'Pretendard', sans-serif;
+            font-family: 'Pretendard', -apple-system, sans-serif;
             background-color: var(--bg-color);
             display: flex;
-            flex-direction: column; /* 배너 배치를 위해 컬럼 방향으로 변경 */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -28,46 +28,55 @@
             text-align: center;
             width: 100%;
             max-width: 350px;
-            margin-bottom: 30px; /* 배너와 간격 */
+            margin-bottom: 25px;
         }
         h1 { color: #333; font-size: 1.5rem; margin-bottom: 1.5rem; }
         input[type="date"] {
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
-            width: 80%;
+            width: 85%;
             margin-bottom: 1rem;
             font-size: 1rem;
+            outline: none;
         }
+        input[type="date"]:focus { border-color: var(--primary-color); }
         .result {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             padding: 1.5rem;
             background: #f0f4f8;
             border-radius: 15px;
         }
         #dday-text {
-            font-size: 3rem;
-            font-weight: bold;
+            font-size: 3.5rem;
+            font-weight: 800;
             color: var(--primary-color);
-            margin: 0;
+            margin: 10px 0;
         }
-        .desc { color: #666; margin-top: 5px; }
+        .desc { color: #666; font-size: 0.9rem; }
         button {
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 10px;
+            font-weight: bold;
+            transition: 0.2s;
         }
-        button:hover { opacity: 0.9; }
+        button:hover { background: #357abd; }
 
-        /* 쿠팡 배너 스타일 */
-        .coupang-banner {
+        /* 배너 영역 스타일 */
+        #coupang-banner-box {
             width: 100%;
             max-width: 350px;
-            text-align: center;
+            min-height: 120px; /* 배너 로드 전 공간 확보 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -77,35 +86,40 @@
     <h1>📅 D-Day Tracker</h1>
     <input type="date" id="target-date">
     <br>
-    <button onclick="saveDate()">날짜 저장</button>
+    <button onclick="saveDate()">설정 및 저장</button>
 
     <div class="result">
-        <p class="desc" id="event-name">오늘부터 목표일까지</p>
+        <p class="desc">선택한 날까지</p>
         <h2 id="dday-text">D-?</h2>
     </div>
 </div>
 
-<div class="coupang-banner">
-    <script src="https://ads-partners.coupang.com/g.js"></script>
-    <script>
-        new Couples.SearchBanner({
-            "trackingCode": "AF4757238",
-            "subId": null,
-            "width": 300,
-            "height": 120
-        });
-    </script>
-</div>
+<div id="coupang-banner-box"></div>
+
+<script src="https://ads-partners.coupang.com/g.js"></script>
 
 <script>
     const dateInput = document.getElementById('target-date');
     const ddayText = document.getElementById('dday-text');
 
+    // 페이지 로드 완료 후 실행
     window.onload = function() {
+        // 1. 기존 데이터 불러오기
         const savedDate = localStorage.getItem('user-dday');
         if (savedDate) {
             dateInput.value = savedDate;
             calculateDDay(savedDate);
+        }
+
+        // 2. 쿠팡 배너 생성 (ID 지정 방식)
+        if (typeof Couples !== 'undefined') {
+            new Couples.SearchBanner({
+                "trackingCode": "AF4757238",
+                "subId": null,
+                "width": 300,
+                "height": 120,
+                "container": "coupang-banner-box" // 배너가 그려질 div ID
+            });
         }
     };
 
@@ -115,6 +129,8 @@
         
         const target = new Date(targetDate);
         target.setHours(0, 0, 0, 0);
+
+        if (isNaN(target.getTime())) return;
 
         const diff = target.getTime() - today.getTime();
         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -130,10 +146,13 @@
 
     function saveDate() {
         const val = dateInput.value;
-        if (!val) return alert("날짜를 선택해 주세요!");
-        
+        if (!val) {
+            alert("날짜를 선택해 주세요!");
+            return;
+        }
         localStorage.setItem('user-dday', val);
         calculateDDay(val);
+        alert("날짜가 저장되었습니다!");
     }
 
     dateInput.addEventListener('change', (e) => {
