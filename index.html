@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>심플 디데이 카운터 & 쇼핑</title>
+    <title>D-Day & Shopping</title>
     <style>
         :root {
             --primary-color: #4a90e2;
             --bg-color: #f4f7f6;
+            --coupang-red: #E63328;
         }
         body {
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: 'Pretendard', sans-serif;
             background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
@@ -24,61 +25,100 @@
             background: white;
             padding: 2rem;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             text-align: center;
             width: 100%;
             max-width: 350px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
-        h1 { color: #333; font-size: 1.5rem; margin-bottom: 1.5rem; }
+        h1 { color: #333; font-size: 1.4rem; margin-bottom: 1.2rem; }
         input[type="date"] {
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 1px solid #ddd;
             border-radius: 8px;
             width: 85%;
-            margin-bottom: 1rem;
             font-size: 1rem;
-            outline: none;
+            margin-bottom: 1rem;
         }
         .result {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background: #f0f4f8;
-            border-radius: 15px;
+            margin-top: 1rem;
+            padding: 1.2rem;
+            background: #f8fafc;
+            border-radius: 12px;
         }
         #dday-text {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 800;
             color: var(--primary-color);
-            margin: 10px 0;
+            margin: 5px 0;
         }
-        .desc { color: #666; font-size: 0.9rem; }
         button {
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px;
             border-radius: 8px;
+            width: 100%;
             cursor: pointer;
             font-weight: bold;
-            width: 100%;
-            max-width: 200px;
         }
-        
-        /* 쿠팡 배너 영역 */
-        #coupang-banner-box {
+
+        /* 이미지 배너 스타일 - 즉시 로딩됨 */
+        .image-banner {
             width: 100%;
             max-width: 350px;
-            min-height: 120px;
             background: #fff;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            border-radius: 15px;
             overflow: hidden;
             border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: transform 0.2s;
         }
-        .loading-msg { font-size: 0.8rem; color: #999; }
+        .image-banner:hover {
+            transform: translateY(-3px);
+        }
+        .banner-img {
+            width: 80px;
+            height: 80px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            margin-right: 15px;
+            background-image: url('https://img1a.coupangcdn.com/image/static/lp/logo/logo_coupang_re_m.png'); /* 쿠팡 로고 혹은 꽃 이미지 */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .banner-info {
+            text-align: left;
+            flex: 1;
+        }
+        .banner-tag {
+            background: var(--coupang-red);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .banner-title {
+            font-size: 0.9rem;
+            color: #333;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.3;
+        }
+        .banner-cta {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -86,78 +126,45 @@
 <div class="container">
     <h1>📅 D-Day Tracker</h1>
     <input type="date" id="target-date">
-    <br>
     <button onclick="saveDate()">설정 저장</button>
-
     <div class="result">
-        <p class="desc">선택한 날짜까지</p>
         <h2 id="dday-text">D-?</h2>
     </div>
 </div>
 
-<div id="coupang-banner-box">
-    <p class="loading-msg">배너를 불러오는 중...</p>
-</div>
-
-<script src="https://ads-partners.coupang.com/g.js"></script>
+<a href="https://link.coupang.com/a/eiCq8y" target="_blank" class="image-banner">
+    <div class="banner-img"></div>
+    <div class="banner-info">
+        <span class="banner-tag">쿠팡 로켓배송</span>
+        <p class="banner-title">오늘의 추천 꽃 보러가기</p>
+        <p class="banner-cta">최저가 확인하고 구매하기 &gt;</p>
+    </div>
+</a>
 
 <script>
     const dateInput = document.getElementById('target-date');
     const ddayText = document.getElementById('dday-text');
-    const bannerBox = document.getElementById('coupang-banner-box');
 
-    // 1. 디데이 계산 로직
     function calculateDDay(targetDate) {
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        today.setHours(0,0,0,0);
         const target = new Date(targetDate);
-        target.setHours(0, 0, 0, 0);
+        target.setHours(0,0,0,0);
         if (isNaN(target.getTime())) return;
-
         const diff = target.getTime() - today.getTime();
         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
-        if (days === 0) ddayText.innerText = "D-Day";
-        else if (days > 0) ddayText.innerText = `D-${days}`;
-        else ddayText.innerText = `D+${Math.abs(days)}`;
+        ddayText.innerText = days === 0 ? "D-Day" : (days > 0 ? `D-${days}` : `D+${Math.abs(days)}`);
     }
 
     function saveDate() {
-        const val = dateInput.value;
-        if (!val) return alert("날짜를 선택해 주세요!");
-        localStorage.setItem('user-dday', val);
-        calculateDDay(val);
+        localStorage.setItem('user-dday', dateInput.value);
+        calculateDDay(dateInput.value);
     }
 
-    // 2. 쿠팡 배너 렌더링 로직 (재시도 기능 포함)
-    function renderCoupangBanner() {
-        if (typeof Couples !== 'undefined') {
-            bannerBox.innerHTML = ""; // 로딩 메시지 제거
-            new Couples.SearchBanner({
-                "trackingCode": "AF4757238", // 형님 파트너스 아이디
-                "subId": null,
-                "width": 300,
-                "height": 120,
-                "container": "coupang-banner-box"
-            });
-        } else {
-            // 스크립트가 아직 안 왔으면 0.5초 뒤에 다시 시도
-            console.log("Coupang script loading...");
-            setTimeout(renderCoupangBanner, 500);
-        }
-    }
-
-    // 초기 실행
-    window.onload = function() {
-        const savedDate = localStorage.getItem('user-dday');
-        if (savedDate) {
-            dateInput.value = savedDate;
-            calculateDDay(savedDate);
-        }
-        renderCoupangBanner();
+    window.onload = () => {
+        const saved = localStorage.getItem('user-dday');
+        if (saved) { dateInput.value = saved; calculateDDay(saved); }
     };
-
-    dateInput.addEventListener('change', (e) => calculateDDay(e.target.value));
 </script>
 
 </body>
